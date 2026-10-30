@@ -5,63 +5,61 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Mlflow Version](https://img.shields.io/badge/Mlflow-2.14.2-blue)](https://mlflow.org/)
 [![Ray[serve] Version](https://img.shields.io/badge/Ray%5Bserve%5D-2.31.0-blue)](https://www.ray.io/)
-[![AutoGen Version](https://img.shields.io/badge/pyautogen-0.2.32-blue)](https://github.com/microsoft/autogen)
+[![AG2 Version](https://img.shields.io/badge/ag2-0.2.32-blue)](https://github.com/ag2ai/ag2)
 [![Contact](https://img.shields.io/badge/Contact-alejbormeg%40gmail.com-green)](mailto:alejbormeg@gmail.com)
 
 </div>
 
 
 
-# 🤖 Complete GenIA Platform for Autogen Agents 🤖
+# GenIA Platform
 
+Master's thesis for the Master in Big Data, Data Science & AI (UCM).
+Graded 10/10 and awarded first prize at UCM and NTIC Máster.
 
-## Overview 🚀
+An on-premise platform that serves a team of AutoGen agents answering
+business questions in SQL. MLflow handles experiment tracking and the
+model registry, Ray Serve handles serving, and Prometheus and Grafana
+monitor the cluster. A Gradio UI sits on top.
 
-This repository showcases the development of a state-of-the-art on-premise machine learning platform, designed to push the boundaries of what is possible with current ML technologies. Our platform is built with the goal of deploying cutting-edge AI models and agents in a scalable, secure, and highly customizable environment. Leveraging tools like **MLflow** and **Ray**, which are typically cloud-focused, we bring their capabilities on-premise, ensuring that enterprises can maintain control over their data and infrastructure while accessing the latest advancements in AI.
+## What it does
 
-### State-of-the-Art ML Platform 🛠️
+The platform follows [MLOps stage 0](https://mlops-for-all.github.io/en/docs/introduction/levels/):
+experiments are tracked in MLflow, the chosen configuration is
+registered, and Ray Serve exposes it.
 
-Our platform integrates a robust set of tools and technologies to create a comprehensive environment for machine learning operations (MLOps). By adapting **MLflow** for experiment tracking and model registry, and **Ray** for scalable model serving, we have constructed a system that supports the full lifecycle of machine learning models—from experimentation to deployment. This on-premise setup is particularly valuable for organizations that require stringent data governance and wish to avoid the limitations or risks associated with cloud-based solutions.
+![Stage 0 architecture](./imgs/stage_0.png)
 
-This is the schema following the [Stage 0 of Mlops](https://mlops-for-all.github.io/en/docs/introduction/levels/):
+The NL2SQL agent team, built with AutoGen and retrieval over the
+database schema:
 
-![Stage 0: with our architecture](./imgs/stage_0.png)
-
-### Innovative Deployment of Agent Chat with Autogen and RAG 🤖
-
-What sets this platform apart is our pioneering use of **Autogen** to deploy an intelligent agent chat system, enhanced by **Retrieval-Augmented Generation (RAG)**. This approach is at the forefront of AI research, yet it has not been fully integrated into the mainstream repositories of tools like MLflow and Ray. By combining these technologies, we are able to deploy agents that can not only process natural language queries into SQL but also iteratively improve these queries through contextual understanding and feedback loops.
-
-The integration of Autogen and RAG within our platform represents a novel achievement. **Autogen** allows for the orchestration of multi-agent systems that can interact and refine their outputs in real-time, while **RAG** provides the ability to retrieve relevant information dynamically, improving the accuracy and relevance of the generated SQL queries. This capability is groundbreaking, as it enables the deployment of agents that are not just static responders but are capable of continuous learning and adaptation—something that is not yet fully supported by existing tools like MLflow and Ray in their standard offerings.
-
-### Architecture Highlights 🏗️
-
-- **MLflow for Experiment Tracking**: Our platform uses MLflow in an on-premise environment, where we conduct extensive experiments to find the optimal configurations for embedding models, chunking strategies, and GPT-based SQL generation. The winning configuration, identified as **GPT-4o** with a chunk size of **1536** and a **fixed** chunking strategy, achieved state-of-the-art performance in NL2SQL tasks.
-
-- **Ray Cluster for Scalable Serving**: We deploy a Ray cluster on-premise, integrated with Prometheus and Grafana for real-time monitoring. This setup ensures that our agent system can scale efficiently, handling large volumes of requests while maintaining performance.
-
-- **Gradio for User Interaction**: The platform features a Gradio-based UI that allows users to interact with the deployed models and agents. This interface seamlessly connects to the underlying infrastructure, providing an intuitive experience for managing and querying the models.
-
-### Deployment of the NL2SQL Agent System 💡
-
-With the platform’s robust infrastructure in place, we deployed an advanced agent chat system using **Autogen** and **RAG**. This system includes:
-
-- **User Proxy Agent**: Rewrites and routes user queries to the appropriate agents.
-- **Planner Agent**: Crafts a plan for executing the NL2SQL task, consulting the PostgreSQL database as needed.
-- **NL-to-SQL Agent**: Generates SQL queries based on the planned task.
-- **Feedback Loop Agent**: Iteratively refines the SQL queries, ensuring they meet the desired accuracy and relevance before being sent back to the user.
+- **User proxy:** rewrites the question and routes it.
+- **Planner:** plans the task and consults PostgreSQL when needed.
+- **NL-to-SQL:** writes the SQL query.
+- **Feedback loop:** reviews the query and asks for corrections before
+  the answer goes back to the user.
 
 ![Agents flow](./imgs/NL2SQL_agents.png)
 
-This agent system represents a significant step forward in AI deployment, capable of handling complex tasks with high accuracy by leveraging state-of-the-art techniques and infrastructure.
+## Evaluation
 
-### Metrics and Continuous Improvement 📈
+I used MLflow to compare embedding models, chunking strategies and
+LLMs. In my tests the best setup was GPT-4o with fixed 1536-token
+chunks. Generated SQL is scored against reference queries with fuzzy
+string similarity (FuzzyWuzzy) plus an LLM-as-a-judge check with
+GPT-4o, and every run is logged to MLflow.
 
-We evaluate the performance of the generated SQL queries using a combination of **FuzzyWuzzy** similarity scores and a secondary validation process involving **GPT-4o**. This ensures that the queries meet a high standard of accuracy and relevance. The platform’s ability to log these evaluations in MLflow allows for continuous monitoring and refinement, ensuring that the deployed agents continue to improve over time.
+I wrote about the evaluation approach (in Spanish):
+[Cómo evalúo una solución de lenguaje natural a SQL](https://alejandro-borrego-ia.alejbormeg.chatgpt.site/notas/evaluar-nl2sql/).
 
-### Conclusion 🎯
+## Limitations
 
-This repository not only demonstrates the successful deployment of an advanced on-premise ML platform but also pioneers the integration of Autogen and RAG within this environment. By pushing the capabilities of tools like MLflow and Ray beyond their current mainstream uses, we offer a novel solution that is poised to set new standards in the deployment and management of intelligent agent systems.
-
+- Research prototype from 2024. It is not maintained for production use.
+- Pinned versions: AutoGen 0.2 API through `ag2==0.2.32`,
+  MLflow 2.14.2 and Ray 2.31.0.
+- A LangChain + Starlite rewrite is scaffolded in `src/langchain_app/`
+  but not finished.
+- Token counts are logged; there is no cost analysis.
 
 ## Architecture
 
@@ -75,10 +73,10 @@ chmod +x start_all.sh
 ./start_all.sh
 ```
 
-This script creates an internal Docker network that seamlessly connects the containers for PostgreSQL, Ray, and the Gradio UI. This setup enables the complete platform to function cohesively, allowing you to deploy models with Ray, execute queries on PostgreSQL, and interact with the platform through the Gradio UI.
+This script creates an internal Docker network that connects the containers for PostgreSQL, Ray, and the Gradio UI. This setup enables the complete platform to function cohesively, allowing you to deploy models with Ray, execute queries on PostgreSQL, and interact with the platform through the Gradio UI.
 
 
-### Mlflow: Model Registry 📊
+### Mlflow: Model Registry
 
 In the `architecture/mlflow` directory, you will find a `docker-compose.yml` file that sets up a multi-container architecture for an MLflow deployment, including storage, database, and web server components. Here's an explanation of each component and their roles:
 
@@ -147,7 +145,7 @@ In the `architecture/mlflow` directory, you will find a `docker-compose.yml` fil
 
 #### Summary
 
-This architecture sets up a robust environment for MLflow, including:
+This architecture sets up the environment for MLflow, including:
 
 * **Minio** for S3-compatible storage.
 * **Postgres** for the backend database.
@@ -157,7 +155,7 @@ This architecture sets up a robust environment for MLflow, including:
 
 Each service is isolated in its own container and connected via Docker networks, ensuring modularity and ease of management.
 
-#### Steps to Connect PGAdmin to PostgreSQL 🛠️
+#### Steps to Connect PGAdmin to PostgreSQL
 
 1. Open PGAdmin and register a new server.
 2. **Connection Tab**:
@@ -167,7 +165,7 @@ Each service is isolated in its own container and connected via Docker networks,
    - **Username**: `username`
    - **Password**: `password`
 
-#### Steps to Add PGVector Extension to a PostgreSQL Container Database 🗃️
+#### Steps to Add PGVector Extension to a PostgreSQL Container Database
 
 1. **Create a Database**:
     ![Create Database](./imgs/create_database_pgadmin.png)
@@ -222,7 +220,7 @@ PGADMIN_LISTEN_PORT=8080
 - **`PGADMIN_DEFAULT_PASSWORD`**: The default password for PgAdmin, changed to `new_pgadmin_password`. This password should be secure.
 - **`PGADMIN_LISTEN_PORT`**: The port PgAdmin will listen on, updated to `8080` to avoid conflicts with other services that might be using port 90.
 
-### Ray Cluster: Model Serving 🚀
+### Ray Cluster: Model Serving
 
 This setup defines a Docker Compose configuration for running a Ray cluster with a head node, integrated with Prometheus and Grafana for monitoring. The architecture includes a Dockerfile and an entrypoint script to facilitate the installation and configuration of necessary components.
 
@@ -329,7 +327,7 @@ This setup creates a Ray cluster head node within a Docker container, integrated
 
 Here is the ordered and completed bibliography with relevant links:
 
-### Gradio: User Interface 🎨
+### Gradio: User Interface
 
 The Gradio-based User Interface in this project is located in the `frontend` directory. This UI allows users to interact with the machine learning models and the underlying database through a web-based interface.
 
@@ -409,9 +407,9 @@ To stop the Gradio UI, you can run:
 ./stop_front_app.sh
 ```
 
-This setup provides a complete and interactive web interface for users to manage and interact with their data and machine learning models seamlessly.
+This setup provides a complete and interactive web interface for users to manage and interact with their data and machine learning models.
 
-### Testing the Platform 🧪
+### Testing the Platform
 
 To ensure that the platform is up and running, we have implemented a series of tests using pytest. These tests verify the connectivity and functionality of various components, including Ray, PostgreSQL, MLflow, and Minio. Here is an overview of the tests:
 
@@ -463,7 +461,7 @@ To ensure accuracy in the result comparison, an additional check is performed us
 
 ### Mlflow Experiment for winner configuration
 
-The provided script is a robust Python program that orchestrates these experiments, leveraging OpenAI's GPT models (specifically GPT-4o and GPT-3.5-Turbo) to translate natural language queries into SQL. Additionally, the script applies embedding techniques to enhance the quality of the generated SQL queries. The entire experimental process is meticulously tracked and logged using MLflow, ensuring that all configurations and results are stored for comprehensive analysis and comparison.
+The provided script orchestrates these experiments, leveraging OpenAI's GPT models (specifically GPT-4o and GPT-3.5-Turbo) to translate natural language queries into SQL. Additionally, the script applies embedding techniques to enhance the quality of the generated SQL queries. Every configuration and result is logged to MLflow for later comparison.
 
 
 #### Key Components:
